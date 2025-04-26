@@ -5,14 +5,13 @@ const SignUp = () => {
   const [formData, setFormData] = useState({
     username: "",
     email: "",
-    password: "",
   });
 
   const handleAddUser = async () => {
-    const { username, email, password } = formData;
+    const { username, email} = formData;
 
   // Basic validation
-  if (!username || !email || !password) {
+  if (!username || !email) {
     alert("All fields are required!");
     return;
   }
@@ -29,29 +28,6 @@ const SignUp = () => {
     alert("Please enter a valid email address.");
     return;
   }
-
-  // Password validation
-  if (password.length < 6) {
-    alert("Password must be at least 6 characters long.");
-    return;
-  }
-  if (!/[A-Z]/.test(password)) {
-    alert("Password must contain at least one uppercase letter.");
-    return;
-  }
-  if (!/[a-z]/.test(password)) {
-    alert("Password must contain at least one lowercase letter.");
-    return;
-  }
-  if (!/[0-9]/.test(password)) {
-    alert("Password must contain at least one number.");
-    return;
-  }
-  if (!/[!@#$%^&*]/.test(password)) {
-    alert("Password must contain at least one special character (!@#$%^&*).");
-    return;
-  }
-
     try{
       const response = await axios.post("http://localhost:5000/api/users/signup", formData);      
       if(response.status === 201) {
@@ -70,6 +46,7 @@ const SignUp = () => {
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
       <div className="bg-white p-8 rounded shadow-md w-full max-w-md">
         <h2 className="text-2xl font-bold mb-6 text-center">Signup</h2>
+      <form onSubmit={handleAddUser}>
       <input
         className="w-full p-3 mb-4 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
         type="text"
@@ -84,18 +61,12 @@ const SignUp = () => {
         value={formData.email}
         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
       />
-      <input
-        className="w-full p-3 mb-4 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-        type="password"
-        placeholder="Password"
-        value={formData.password}
-        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-      />
       <button
         className="w-full bg-blue-500 text-white py-3 rounded hover:bg-blue-600 transition"
-        onClick={handleAddUser}>
+        >
         SignUp
       </button>
+      </form>
     </div>
     </div>
   );

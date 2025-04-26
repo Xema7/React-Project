@@ -1,7 +1,7 @@
 import User from "../models/User.js";
 
 //User List
-export const userList = async (req, res) => {
+export const homePage= async (req, res) => {
   try {
     const users = await User.find({});
     res.status(200).json({ success: true, data: users });
@@ -11,35 +11,15 @@ export const userList = async (req, res) => {
   }
 };
 
-//SignIn
-export const signInUsers = async (req, res) => {
-  const { identifier, password } = req.body;
-
-  // 1. Validate input
-  if (!identifier || !password) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Both fields are required" });
-  }
-
+export const findId = async (req, res) => {
   try {
-    // 2. Find user by email OR username
-    const user = await User.findOne({
-      $or: [{ email: identifier }, { username: identifier }],
-    });
-
-    // 3. Check existence & password match
-    if (!user || user.password !== password) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Invalid credentials" });
+    const user = await User.findById(req.params.id); // Replace with your database query
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
     }
-
-    // 4. Success—return username
-    return res.status(200).json({ success: true, username: user.username });
+    res.json({ success: true, data: user });
   } catch (error) {
-    console.error("Error in sign-in", error.message);
-    return res.status(500).json({ success: false, message: "Server Error" });
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 };
   
@@ -47,7 +27,7 @@ export const signInUsers = async (req, res) => {
   export const createUser = async (req, res) => {
       const user = req.body;
     
-      if(!user.username || !user.email || !user.password){
+      if(!user.username || !user.email){
         return  res.status(400).json({success:false, message:"Please fill all fields"});
       }
     
@@ -65,33 +45,35 @@ export const signInUsers = async (req, res) => {
     //Update User
     export const updateUser =  async (req, res) => {
         const {id} = req.params;
-        const user = req.body;
+        const {username, email} = req.body;
       
-        if(!mongoose.Types.ObjectId.isValid(id)){
-          return res.status(404).json({success:false, message:"Invalid user ID"});
-        }
+        // if(!mongoose.Types.ObjectId.isValid(id)){
+        //   return res.status(404).json({success:false, message:"Invalid user ID"});
+        // }
       
         try{
-          const updatedUser = await User.findByIdAndUpdate(id, user, {new:true});
+          const updatedUser = await User.findByIdAndUpdate(id, {username, email}, {new:true});
           res.status(200).json({success:true, data: updatedUser});
         }catch(error){
           console.error("Error in updating user", error.message);
           res.status(500).json({success:false, message:"Server Error"});
         }
-      }
+      };
 
       //Delete User
-      export const deleteUser = async (req, res) =>{
-        const {id} = req.params;
-        
-        if(!mongoose.Types.ObjectId.isValid(id)){
-            return res.status(404).json({success:false, message:"Invalid user ID"});
+      export const deleteUser = async (req, res) => {
+        try {
+          const { id } = req.params;
+          const user = await User.findByIdAndDelete(id); // Delete user by ID
+          if (!user) {
+            return res.status(404).json({ success: false, message: "User not found" });
           }
-
-        try{
-          await User.findByIdAndDelete(id);
-          res.status(200).json({success:true, message:"User deleted successfully"});
-        }catch(error){
-          res.status(500).json({success:false, message:"Server error"});
+          res.json({ success: true, message: "User deleted successfully" });
+        } catch (err) {
+          console.error(err);
+          res.status(500).json({ success: false, message: "Server error" });
         }
-      }
+      };
+      
+
+      

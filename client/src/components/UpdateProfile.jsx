@@ -1,9 +1,11 @@
 import React, { useState, useEffect} from 'react';
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from 'axios';
 
 function UpdateProfile() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { id } = location.state || {};
   
 
   // State for username and email
@@ -11,9 +13,11 @@ function UpdateProfile() {
   const [email, setEmail] = useState('');
 
   useEffect(() => {
+    if (id) {
+
     const fetchUserDetails = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/users/updateprofile"); // Use Axios for GET request
+        const res = await axios.get(`http://localhost:5000/api/users/${id}`); // Use Axios for GET request
         const result = res.data;
         if (result.success) {
           setUsername(result.data.username); // Set username
@@ -26,19 +30,16 @@ function UpdateProfile() {
       }
     };
     fetchUserDetails();
-  }, []);
+  }}, [id]);
 
   // Function to handle profile update
   const handleUpdateProfile = async () => {
     try {
-      const response = await axios.put('/api/updateprofile', { // Use Axios for PUT request
-        username,
-        email,
-      });
+      const response = await axios.put(`http://localhost:5000/api/users/${id}`, {username, email}); 
 
       if (response.status === 200) {
         alert('Profile updated successfully!');
-        navigate('/profile'); // Redirect to the profile page after update
+        navigate('/'); // Redirect to the profile page after update
       } else {
         alert('Failed to update profile.');
       }
@@ -49,8 +50,9 @@ function UpdateProfile() {
   };
 
   return (
-    <div>
-      <h2>Update Profile</h2>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+    <div className="bg-white p-8 rounded shadow-md w-full max-w-md">
+      <h1 className="text-center text-2xl font-bold mb-4">Update Profile</h1>
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -58,29 +60,34 @@ function UpdateProfile() {
         }}
       >
         <div>
-          <label htmlFor="username">Username:</label>
+          <label htmlFor="username" className="text-gray-700 font-bold mb-2 block" >Username:</label>
           <input
+            className="w-full p-3 mb-4 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             type="text"
             id="username"
-            value={username}
+            value={username || ''}
             onChange={(e) => setUsername(e.target.value)}
             placeholder="Enter new username"
             required
           />
         </div>
         <div>
-          <label htmlFor="email">Email:</label>
+          <label htmlFor="email" className="text-gray-700 font-bold mb-2 block">Email:</label>
           <input
+            className="w-full p-3 mb-4 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             type="email"
             id="email"
-            value={email}
+            value={email || ''}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Enter new email"
             required
           />
         </div>
-        <button type="submit">Update Profile</button>
+        <button type="submit"
+          className="w-full bg-blue-500 text-white py-3 rounded hover:bg-blue-600 transition"
+        >Update Profile</button>
       </form>
+    </div>
     </div>
   );
 }
